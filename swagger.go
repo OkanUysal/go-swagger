@@ -128,6 +128,25 @@ func Setup(router *gin.Engine, config *Config) {
 	router.GET(config.UIPath+"/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 }
 
+// SetupWithInstance configures Swagger UI routes and returns the Swagger instance for manual configuration
+func SetupWithInstance(router *gin.Engine, config *Config) *Swagger {
+	swagger := New(config)
+
+	// Skip if disabled
+	if !config.Enabled {
+		return swagger
+	}
+
+	// Serve dynamic swagger.json
+	router.GET(config.JSONPath, swagger.docHandler)
+
+	// Serve Swagger UI
+	url := ginSwagger.URL(config.JSONPath)
+	router.GET(config.UIPath+"/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+	
+	return swagger
+}
+
 // docHandler serves the swagger.json with dynamic host and scheme
 func (s *Swagger) docHandler(c *gin.Context) {
 	// Update host if auto-detection is enabled
