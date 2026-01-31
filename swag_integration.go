@@ -9,11 +9,30 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// SwagSpec represents the generated swagger spec from swag init
+// SwagSpec holds the global swagger spec parsed from swag init
 var SwagSpec interface{}
 
-// SetupWithSwag configures Swagger UI using swag-generated docs with runtime host detection
-// This function expects docs to be imported: import _ "yourproject/docs"
+// SetupWithSwag configures Swagger UI using swag-generated documentation with runtime host detection.
+//
+// This is the recommended approach for Railway deployments. It allows you to:
+// - Use standard swag annotations (@Summary, @Router, etc.)
+// - Auto-detect host from Railway headers/environment
+// - Override @host annotation at runtime
+//
+// Example:
+//
+//	import _ "myapp/docs" // Import swag-generated docs
+//
+//	swaggerConfig := swagger.DefaultConfig()
+//	swaggerConfig.AutoDetectHost = true
+//
+//	swagSpec, _ := swagger.LoadSwagDocs(docs.SwaggerInfo.ReadDoc())
+//	swagger.SetupWithSwag(router, swagSpec, swaggerConfig)
+//
+// Parameters:
+//   - router: Gin engine instance
+//   - swagSpec: Parsed swagger spec from LoadSwagDocs()
+//   - config: Configuration options (use DefaultConfig() for defaults)
 func SetupWithSwag(router *gin.Engine, swagSpec interface{}, config *Config) {
 	if config == nil {
 		config = DefaultConfig()
@@ -62,8 +81,23 @@ func SetupWithSwag(router *gin.Engine, swagSpec interface{}, config *Config) {
 	router.GET(config.UIPath+"/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 }
 
-// LoadSwagDocs loads the swagger docs from swag-generated package
-// Usage: swagger.LoadSwagDocs(docs.SwaggerInfo.ReadDoc())
+// LoadSwagDocs parses swag-generated documentation into a swagger spec.
+//
+// Example:
+//
+//	import _ "myapp/docs"
+//
+//	swagSpec, err := swagger.LoadSwagDocs(docs.SwaggerInfo.ReadDoc())
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+// Parameters:
+//   - docJSON: JSON string from docs.SwaggerInfo.ReadDoc()
+//
+// Returns:
+//   - interface{}: Parsed swagger spec (map[string]interface{})
+//   - error: Parse error if JSON is invalid
 func LoadSwagDocs(docJSON string) (interface{}, error) {
 	var spec interface{}
 	if err := json.Unmarshal([]byte(docJSON), &spec); err != nil {
