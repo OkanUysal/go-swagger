@@ -47,7 +47,58 @@ require (
 
 ## Quick Start
 
-### Basic Usage
+### Option 1: With swag annotations (Recommended)
+
+**1. Add Swagger annotations to your code:**
+
+```go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    "github.com/OkanUysal/go-swagger"
+    _ "yourproject/docs" // Import generated docs
+)
+
+// @title           Your API
+// @version         1.0
+// @description     API documentation
+// @BasePath        /api
+
+func main() {
+    r := gin.Default()
+
+    // Setup Swagger with auto host detection
+    swaggerConfig := swagger.DefaultConfig()
+    swaggerConfig.AutoDetectHost = true // Automatically detect host from request
+    swagger.SetupWithSwag(r, docs.SwaggerInfo, swaggerConfig)
+
+    r.Run(":8080")
+}
+
+// @Summary      Get user
+// @Description  Get user by ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "User ID"
+// @Success      200  {object}  User
+// @Router       /users/{id} [get]
+func GetUser(c *gin.Context) {
+    // handler code
+}
+```
+
+**2. Generate docs:**
+```bash
+swag init
+```
+
+**3. Run your app - Host will be auto-detected!**
+
+### Option 2: Programmatic (Without swag)
+
+**Basic Usage**
 
 ```go
 package main
