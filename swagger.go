@@ -143,7 +143,7 @@ func SetupWithInstance(router *gin.Engine, config *Config) *Swagger {
 	// Serve Swagger UI
 	url := ginSwagger.URL(config.JSONPath)
 	router.GET(config.UIPath+"/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
-	
+
 	return swagger
 }
 
