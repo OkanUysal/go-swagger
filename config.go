@@ -60,7 +60,7 @@ func NewConfig() *Config {
 		Description:    "API Documentation",
 		Version:        "1.0.0",
 		BasePath:       "/",
-		AutoDetectHost: true,
+		AutoDetectHost: true, // Auto-detect by default for Railway
 		Enabled:        true,
 		UIPath:         "/swagger",
 		JSONPath:       "/swagger.json",
@@ -70,7 +70,12 @@ func NewConfig() *Config {
 
 // DefaultConfig returns a Config with sensible defaults (alias for NewConfig)
 func DefaultConfig() *Config {
-	return NewConfig()
+	return &Config{
+		AutoDetectHost: true, // Auto-detect by default for Railway
+		Enabled:        true,
+		UIPath:         "/swagger",
+		JSONPath:       "/swagger.json",
+	}
 }
 
 // WithTitle sets the API title
