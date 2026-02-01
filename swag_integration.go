@@ -105,3 +105,45 @@ func LoadSwagDocs(docJSON string) (interface{}, error) {
 	}
 	return spec, nil
 }
+
+// SetupFromDocs is a convenience function that loads swag-generated docs and sets up Swagger UI.
+// This expects that docs are imported with: import _ "yourapp/docs"
+//
+// Example:
+//
+//	import (
+//		_ "myapp/docs"
+//		docs "myapp/docs"
+//	)
+//
+//	swagger.SetupFromDocs(router, docs.SwaggerInfo, nil)
+//
+// Parameters:
+//   - router: Gin engine instance
+//   - swaggerInfo: docs.SwaggerInfo from your generated docs package
+//   - config: Optional configuration (pass nil for defaults)
+func SetupFromDocs(router *gin.Engine, swaggerInfo interface{}, config *Config) error {
+	if config == nil {
+		config = DefaultConfig()
+	}
+
+	// Extract ReadDoc method from SwaggerInfo
+	type swaggerInfoInterface interface {
+		ReadDoc() string
+	}
+
+	info, ok := swaggerInfo.(swaggerInfoInterface)
+	if !ok {
+		return http.ErrNotSupported
+	}
+
+	// Load swagger docs
+	swagSpec, err := LoadSwagDocs(info.ReadDoc())
+	if err != nil {
+		return err
+	}
+
+	// Setup with loaded spec
+	SetupWithSwag(router, swagSpec, config)
+	return nil
+}
