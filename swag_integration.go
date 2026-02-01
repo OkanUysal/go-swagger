@@ -105,3 +105,30 @@ func LoadSwagDocs(docJSON string) (interface{}, error) {
 	}
 	return spec, nil
 }
+
+// Setup is a convenience function that automatically loads and sets up Swagger.
+// This function expects that swag docs are imported somewhere (import _ "yourapp/docs").
+//
+// Example:
+//
+//	import _ "myapp/docs"
+//
+//	swagger.Setup(router, &swagger.Config{
+//		Title:       "My API",
+//		Description: "API Description",
+//		Version:     "1.0",
+//		BasePath:    "/api/v1",
+//	})
+//
+// Note: This requires the swag CLI to have generated docs first (run `swag init`).
+func Setup(router *gin.Engine, config *Config) error {
+	if config == nil {
+		config = DefaultConfig()
+	}
+
+	// Try to load swagger docs from the generated docs package
+	// This assumes docs.SwaggerInfo has been initialized by importing _ "yourapp/docs"
+	router.GET(config.UIPath+"/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	
+	return nil
+}
